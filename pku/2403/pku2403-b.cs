@@ -1,4 +1,4 @@
-// http://poj.org/problem?id=2403 「Hay Point」
+// http://poj.org/problem?id=2403 「Hay Point」の別解
 using System;
 using System.Collections.Generic;
 using System.Linq;
