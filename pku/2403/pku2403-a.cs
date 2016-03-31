@@ -31,7 +31,7 @@ public class Program {
 			int hayPoints = 0;
 
 			while( true ) {
-
+                
 				input = Console.ReadLine().Split( ' ' );
 				
 				// もし、ピリオドのみ行であれば、次のジョブ記述を読み取ります。
@@ -40,11 +40,11 @@ public class Program {
 					break;
 				}
 
-				// HayPointListに登録されている単語のみを抽出し、
+				// HayPointListに登録されている単語のみを抽出します。
 				hayPoints += input.Where( si => HayPointList.ContainsKey( si ) )
-								  // その単語に関連付けられている、ドルの値を取り出し、
+								  // その単語に関連付けられている、ドルの値を取り出します。
 								  .Select( si => HayPointList[si] )
-								  // 合計値を求めます。
+								  // ドルの値の合計を求めます。
 								  .Sum();
 
 				// ※Where → Select とメソッドをつなげた場合、コンパイル時に最適化されます。
