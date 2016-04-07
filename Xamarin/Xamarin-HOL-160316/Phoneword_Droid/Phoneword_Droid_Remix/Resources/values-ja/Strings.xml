@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- 日本語の文字列リソースです。 -->
+	<string name="appname">Phoneword_Remix</string>
+
+	<string name="Input">電話番号を入力</string>
+	<string name="Translate">変換</string>
+	<string name="Call">発信</string>
+	<string name="CallTo">{0} に発信</string>
+	<string name="ComfirmCallTo">{0} に発信しますか?</string>
+	<string name="Cancel">キャンセル</string>
+	<string name="CallHistory">発信履歴</string>
+</resources>
