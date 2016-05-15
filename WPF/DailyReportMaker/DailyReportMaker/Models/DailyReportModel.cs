@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Xml.Linq;
 
 using Nia_Tech.ModelExtentions;
 
@@ -18,10 +21,10 @@ namespace DailyReportMaker {
 		#region フィールド
 
 		/// <summary>
-		/// 
+		///		改行文字列（ char型配列 ）を表します。
 		/// </summary>
-		private static char[] NewLine = Environment.NewLine.ToCharArray();
-
+		private static char[] newLine = Environment.NewLine.ToCharArray();
+		
 		#endregion
 
 		#region プロパティ
@@ -42,7 +45,7 @@ namespace DailyReportMaker {
 		public ObservableCollection<FailureInfoItem> FailureInfoList { get; private set; }
 
 		/// <summary>
-		///		学生からの質問リストを取得します。
+		///		質問リストを取得します。
 		/// </summary>
 		public ObservableCollection<QuestionItem> QuestionList { get; private set; }
 
@@ -116,6 +119,8 @@ namespace DailyReportMaker {
 
 		#region メソッド
 
+		#region リストのクリアとソート
+
 		/// <summary>
 		///		入力した項目をクリアします。
 		/// </summary>
@@ -130,13 +135,12 @@ namespace DailyReportMaker {
 			OtherMatterList.Clear();
 			LostSumthingList.Clear();
 			FixtureInfo = "";
+
 			DailyReportPreviewTitle = "";
 			DailyReportPreviewContent = "";
 
 			Reporter.Report( "すべての入力フォームを初期化しました。" );
 		}
-
-		#region リストのクリアとソート
 
 		/// <summary>
 		///		勤務概要の項目リストをクリアします。
@@ -262,7 +266,447 @@ namespace DailyReportMaker {
 
 		#endregion
 
-		private string FormatDescription( string format, string value ) {
+		#region XMLファイルの読み書き
+
+		/// <summary>
+		///		指定したXMLファイルから日報データを読み込みます。
+		/// </summary>
+		/// <param name="url">XMLファイルのパス</param>
+		/// <param name="cancellationToken">処理のキャンセルを要求するトークン</param>
+		/// <returns>読み込み結果を格納するResultInfoオブジェクト</returns>
+		private Task<ResultInfo<bool>> LoadDataFile( string url, CancellationToken cancellationToken ) {
+
+			string fileName = Path.GetFileName( url );
+
+			var result = new ResultInfo<bool> {
+				Result = true,
+				Message = $"日報データファイル({fileName})を読み込みました",
+			};
+
+			try {
+				// LINQ to XMLを利用して、XMLファイルを読み込みます。
+				var root = XElement.Load( url );
+				cancellationToken.ThrowIfCancellationRequested();
+
+				#region TA情報
+
+				var meta = root.Element( "metadata" );
+				TAInfo.Date = DateTime.Parse( meta.Attribute( "date" ).Value );
+				TAInfo.RoomName = meta.Attribute( "room_name" ).Value;
+				TAInfo.TAName = meta.Attribute( "ta_name" ).Value;
+				TAInfo.StartTime = DateTime.Parse( meta.Element( "worktime" ).Attribute( "start" ).Value );
+				TAInfo.EndTime = DateTime.Parse( meta.Element( "worktime" ).Attribute( "end" ).Value );
+				TAInfo.Description = meta.Element( "description" ).Value;
+
+				cancellationToken.ThrowIfCancellationRequested();
+
+				#endregion
+
+				#region 業務概要
+
+				var workSummary = root.Element( "worksummary" );
+				var workOverviewList = workSummary.Element( "workoverviewlist" );
+
+				foreach( var item in workOverviewList.Elements( "workoverview" )
+					// SelectメソッドでWorkOverviewItemm型のシーケンスに射影します。
+					.Select(
+						// ※遅延実行のメソッドなので、ここに指定した処理はforeach文による列挙時に実行されます。
+						item => new WorkOverviewItem {
+							StartTime = DateTime.Parse( item.Attribute( "starttime" ).Value ),
+							EndTime = DateTime.Parse( item.Attribute( "endtime" ).Value ),
+							Description = item.Element( "description" ).Value,
+							Remarks = item.Element( "remarks" ).Value
+						}
+					) ) {
+					WorkSummary.WorkingOverviewList.Add( item );
+
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+
+				#region 上の処理の流れ
+				/*
+					foreach文
+					↓
+					work.Elementsメソッド、Selectメソッド
+					↓
+					1つ目の要素を列挙開始
+					↓
+					Selectメソッドの中に指定した処理を実行
+					↓
+					1つ目の要素をObservableCollection<WorkOverviewItem>に追加
+					↓
+					2つ目の要素を列挙開始
+					↓
+					Selectメソッドの中に指定した処理を実行
+					↓
+					2つ目の要素をObservableCollection<WorkOverviewItem>に追加
+					↓
+					・・・
+					↓
+					n個目の要素を列挙開始
+					↓
+					Selectメソッドの中に指定した処理を実行
+					↓
+					n個目の要素をObservableCollection<WorkOverviewItem>に追加
+					↓
+					終了
+
+					このように、Selectメソッドの中に指定した処理は、メソッドを呼び出した時は実行せず、
+					foreach文などで実際に列挙した時に実行されます。
+
+				*/
+				#endregion
+
+				WorkSummary.AboutUser = workSummary.Element( "aboutuser" ).Value;
+
+				#endregion
+
+				#region 機器トラブル
+
+				var failinfo = root.Element( "failureinfolist" );
+
+				foreach( var item in failinfo.Elements( "failureinfo" )
+					.Select(
+						item => new FailureInfoItem {
+							OccuredTime = DateTime.Parse( item.Attribute( "time" ).Value ),
+							TypeName = item.Element( "fixture" ).Attribute( "type" ).Value,
+							Name = item.Element( "fixture" ).Attribute( "name" ).Value,
+							Description = item.Element( "description" ).Value
+						}
+					) ) {
+					FailureInfoList.Add( item );
+
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+
+				#endregion
+
+				#region 質問
+
+				var questionList = root.Element( "questionlist" );
+
+				foreach( var item in questionList.Elements( "question" )
+					.Select(
+						item => new QuestionItem {
+							QuestionTime = DateTime.Parse( item.Attribute( "time" ).Value ),
+							Question = item.Element( "question" ).Value,
+							Answer = item.Element( "answer" ).Value
+						}
+					) ) {
+					QuestionList.Add( item );
+
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+
+				#endregion
+
+				#region 不正印刷
+
+				var injusticePrintList = root.Element( "injusticeprintlist" );
+
+				foreach( var item in injusticePrintList.Elements( "injusticeprint" )
+					.Select(
+						item => new InjusticePrintItem {
+							FoundTime = DateTime.Parse( item.Attribute( "time" ).Value ),
+							User = item.Element( "user" ).Attribute( "name" ).Value,
+							FileName = item.Element( "file" ).Attribute( "name" ).Value,
+							Description = item.Element( "description" ).Value
+						}
+					) ) {
+					InjusticePrintList.Add( item );
+
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+
+				#endregion
+
+				#region 2重ログイン
+
+				var duplicateLoginList = root.Element( "duplicateloginlist" );
+
+				foreach( var item in duplicateLoginList.Elements( "duplicatelogin" )
+					.Select(
+						item => new DuplicateLoginItem {
+							FoundTime = DateTime.Parse( item.Attribute( "time" ).Value ),
+							User = item.Element( "user" ).Value,
+							Description = item.Element( "description" ).Value
+						}
+					) ) {
+					DuplicateLoginList.Add( item );
+
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+
+				#endregion
+
+				#region その他の注意
+
+				var otherMatterList = root.Element( "othermatterlist" );
+
+				foreach( var item in otherMatterList.Elements( "othermatter" )
+					.Select(
+						item => new OtherMatterItem {
+							Description = item.Element( "description" ).Value,
+							Num = int.Parse( item.Attribute( "num" ).Value )
+						}
+					) ) {
+					OtherMatterList.Add( item );
+
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+
+				#endregion
+
+				#region 遺失物
+
+				var lostSumthingList = root.Element( "lostsumthinglist" );
+
+				foreach( var item in lostSumthingList.Elements( "lostsumthing" )
+					.Select(
+						item => new LostSumthingItem {
+							FoundTime = DateTime.Parse( item.Attribute( "time" ).Value ),
+							FoundPlace = item.Attribute( "place" ).Value,
+							Name = item.Element( "name" ).Value,
+							Remarks = item.Element( "remarks" ).Value
+						}
+					) ) {
+					LostSumthingList.Add( item );
+
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+
+				#endregion
+
+				#region 備品状況
+
+				FixtureInfo = root.Element( "fixtureinfo" ).Value;
+
+				#endregion
+
+			}
+			catch( Exception e ) {
+				result.Result = false;
+				result.Message = $"日報データファイル({fileName})の読み込みに失敗しました。";
+				result.AdditionalInfo = e.Message;
+			}
+			finally {
+				if( result.AdditionalInfo != null ) {
+					Reporter.Report( $"{result.Message} (追加情報 : {result.AdditionalInfo})" );
+				}
+				else {
+					Reporter.Report( result.Message );
+				}
+			}
+
+
+			return Task.FromResult( result );
+		}
+
+		/// <summary>
+		///		指定したXMLファイルから日報データを読み込みます。
+		/// </summary>
+		/// <param name="url">XMLファイルのパス</param>
+		public async Task LoadDataFileAsync( string url ) {
+			ClearAll();
+			var result = await LoadDataFile( url, CancellationToken.None );
+		}
+
+		/// <summary>
+		///		指定したXMLファイルに日報データを保存します。
+		/// </summary>
+		/// <param name="url">XMLファイルのパス</param>
+		/// <param name="cancellationToken">処理のキャンセルを要求するトークン</param>
+		/// <returns>保存結果を格納するResultInfoオブジェクト</returns>
+		private Task<ResultInfo<bool>> SaveDataFile( string url, CancellationToken cancellationToken ) {
+
+			string fileName = Path.GetFileName( url );
+
+			var result = new ResultInfo<bool> {
+				Result = true,
+				Message = $"日報データファイル({fileName})を保存しました。",
+			};
+
+			try {
+
+				#region TA情報
+
+				var metadata = new XElement( "metadata",
+					new XAttribute( "date", TAInfo.Date.ToString( "yyyy/MM/dd" ) ),
+					new XAttribute( "room_name", TAInfo.RoomName ),
+					new XAttribute( "ta_name", TAInfo.TAName ),
+					new XElement( "worktime",
+						new XAttribute( "start", TAInfo.StartTime.ToString( "H:mm" ) ),
+						new XAttribute( "end", TAInfo.EndTime.ToString( "H:mm" ) )
+					),
+					new XElement( "description", TAInfo.Description )
+				);
+
+				#endregion
+
+				#region 業務概要
+
+				var workOverviewList = new XElement( "workoverviewlist",
+					WorkSummary.WorkingOverviewList.Select(
+						item =>
+							new XElement( "workoverview",
+								new XAttribute( "starttime", item.StartTime.ToString( "H:mm" ) ),
+								new XAttribute( "endtime", item.EndTime.ToString( "H:mm" ) ),
+								new XElement( "description", item.Description ),
+								new XElement( "remarks", item.Remarks )
+						)
+					)
+				);
+
+				var workSummary = new XElement( "worksummary",
+					workOverviewList,
+					new XElement( "aboutuser", WorkSummary.AboutUser )
+				);
+
+				#endregion
+
+				#region 機器トラブル
+
+				var failureInfoList = new XElement( "failureinfolist",
+					FailureInfoList.Select(
+						item =>
+							new XElement( "failureinfo",
+								new XAttribute( "time", item.OccuredTime.ToString( "H:mm" ) ),
+								new XElement( "fixture",
+									new XAttribute( "type", item.TypeName ),
+									new XAttribute( "name", item.Name )
+								),
+								new XElement( "description", item.Description )
+						)
+					)
+				);
+
+				#endregion
+
+				#region 質問
+
+				var questionList = new XElement( "questionlist",
+					QuestionList.Select(
+						item =>
+							new XElement( "question",
+								new XAttribute( "time", item.QuestionTime.ToString( "H:mm" ) ),
+								new XElement( "question", item.Question ),
+								new XElement( "answer", item.Answer )
+						)
+					)
+				);
+
+				#endregion
+
+				#region 不正印刷
+
+				var injusticePrintList = new XElement( "injusticeprintlist",
+					InjusticePrintList.Select(
+						item =>
+							new XElement( "injusticeprint",
+								new XAttribute( "time", item.FoundTime.ToString( "H:mm" ) ),
+								new XElement( "user", new XAttribute( "name", item.User ) ),
+								new XElement( "file", new XAttribute( "name", item.FileName ) ),
+								new XElement( "description", item.Description )
+							)
+					)
+				);
+
+				#endregion
+
+				#region 2重ログイン
+
+				var duplicateLoginList = new XElement( "duplicateloginlist",
+					DuplicateLoginList.Select(
+						item =>
+							new XElement( "duplicatelogin",
+								new XAttribute( "time", item.FoundTime.ToString( "H:mm" ) ),
+								new XElement( "user", item.User ),
+								new XElement( "description", item.Description )
+							)
+					)
+				);
+
+				#endregion
+
+				#region その他の注意
+
+				var othterMatterList = new XElement( "othermatterlist",
+					OtherMatterList.Select(
+						item =>
+							new XElement( "othermatter",
+								new XAttribute( "num", item.Num ),
+								new XElement( "description", item.Description )
+							)
+					)
+				);
+
+				#endregion
+
+				#region 遺失物
+
+				var lostSumthingList = new XElement( "lostsumthinglist",
+					LostSumthingList.Select(
+						item =>
+							new XElement( "lostsumthing",
+								new XAttribute( "time", item.FoundTime.ToString( "H:mm" ) ),
+								new XAttribute( "place", item.FoundPlace ),
+								new XElement( "name", item.Name ),
+								new XElement( "remarks", item.Remarks )
+							)
+					)
+				);
+
+				#endregion
+
+				#region 備品状況
+
+				var fixtureInfo = new XElement( "fixtureinfo", FixtureInfo );
+
+				#endregion
+
+				var root = new XElement( "dailyreport",
+					metadata, workSummary, failureInfoList, questionList, injusticePrintList, duplicateLoginList, othterMatterList, lostSumthingList, fixtureInfo
+				);
+				root.Save( url );
+
+			}
+			catch( Exception e ) {
+				result.Result = false;
+				result.Message = $"日報データファイル({fileName})の保存に失敗しました。";
+				result.AdditionalInfo = e.Message;
+			}
+			finally {
+				if( result.AdditionalInfo != null ) {
+					Reporter.Report( $"{result.Message} (追加情報 : {result.AdditionalInfo})" );
+				}
+				else {
+					Reporter.Report( result.Message );
+				}
+			}
+
+			return Task.FromResult( result );
+		}
+
+		/// <summary>
+		///		指定したXMLファイルに日報データを保存します。
+		/// </summary>
+		/// <param name="url">XMLファイルのパス</param>
+		public async Task SaveDataFileAsync( string url ) {
+			var result = await SaveDataFile( url, CancellationToken.None );
+		}
+
+		#endregion
+
+		#region 日報データの作成
+
+		/// <summary>
+		///		指定した文字列を1行単位で指定した書式を適用します。
+		/// </summary>
+		/// <param name="format">1行単位で適用する書式</param>
+		/// <param name="value">出力したい文字列</param>
+		/// <returns>1行単位で書式を適用した文字列</returns>
+		private string StringFormatForEachLine( string format, string value ) {
+			// 改行記号がない時はそのまま返します。
 			if( !value.Contains( "\n" ) ) {
 				return value;
 			}
@@ -272,7 +716,7 @@ namespace DailyReportMaker {
 			sb.AppendLine();
 			sb.Append(
 				string.Join( "\n",
-					value.Split( NewLine, StringSplitOptions.RemoveEmptyEntries )
+					value.Split( newLine, StringSplitOptions.RemoveEmptyEntries )
 						 .Select( _ => string.Format( format, _ ) )
 				)
 			);
@@ -283,8 +727,9 @@ namespace DailyReportMaker {
 		/// <summary>
 		///		入力した項目から日報データを生成します。
 		/// </summary>
-		/// <returns></returns>
-		private Task<ResultInfo<bool>> GenerateDailyReportData() {
+		/// <param name="cancellationToken">処理のキャンセルを要求するトークン</param>
+		/// <returns>生成結果を表す、ResultInfoオブジェクト</returns>
+		private Task<ResultInfo<bool>> GenerateDailyReportData( CancellationToken cancellationToken ) {
 
 			var result = new ResultInfo<bool> {
 				Result = true, Message = "日報データを作成しました。"
@@ -305,15 +750,17 @@ namespace DailyReportMaker {
 
 				content.AppendLine( string.Format( FormatModel.SubTitle, "勤怠概要" ) );
 
+				// 詳細情報が入力されている時
 				if( string.IsNullOrEmpty( TAInfo.Description ) ) {
 					content.AppendLine( string.Format( FormatModel.AttendanceInfoWithoutDesc, TAInfo.StartTime, TAInfo.EndTime ) );
 				}
+				// 詳細情報がない時
 				else {
 					content.AppendLine(
 						string.Format(
 							FormatModel.AttendanceInfo,
 							TAInfo.StartTime, TAInfo.EndTime,
-							FormatDescription( FormatModel.Description2, TAInfo.Description )
+							StringFormatForEachLine( FormatModel.Description2, TAInfo.Description )
 						)
 					);
 				}
@@ -336,7 +783,7 @@ namespace DailyReportMaker {
 				content.AppendLine();
 
 				content.AppendLine( string.Format( FormatModel.SubTitle, "利用者の状況" ) );
-				foreach( var item in WorkSummary.AboutUser.Split( NewLine, StringSplitOptions.RemoveEmptyEntries ) ) {
+				foreach( var item in WorkSummary.AboutUser.Split( newLine, StringSplitOptions.RemoveEmptyEntries ) ) {
 					content.AppendLine( string.Format( FormatModel.Description, item ) );
 				}
 				content.AppendLine();
@@ -346,6 +793,7 @@ namespace DailyReportMaker {
 				#region PC・ソフトウェアのトラブル
 
 				content.AppendLine( string.Format( FormatModel.SubTitleWithCount, "PC、ソフトウェアなどのトラブル", FailureInfoList.Count ) );
+				// リストに項目がある時
 				if( FailureInfoList.Any() ) {
 					foreach( var item in FailureInfoList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
@@ -354,11 +802,12 @@ namespace DailyReportMaker {
 								item.Index,
 								item.Value.TypeName, item.Value.Name,
 								item.Value.OccuredTime,
-								FormatDescription( FormatModel.ItemDescription, item.Value.Description )
+								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Description )
 							)
 						);
 					}
 				}
+				// リストが空の時
 				else {
 					content.AppendLine( string.Format( FormatModel.Description, PresetModel.None ) );
 				}
@@ -366,9 +815,10 @@ namespace DailyReportMaker {
 
 				#endregion
 
-				#region 学生からの質問
+				#region 質問
 
 				content.AppendLine( string.Format( FormatModel.SubTitleWithCount, "質問", QuestionList.Count ) );
+				// リストに項目がある時
 				if( QuestionList.Any() ) {
 					foreach( var item in QuestionList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
@@ -376,12 +826,13 @@ namespace DailyReportMaker {
 								FormatModel.Questions,
 								item.Index,
 								item.Value.QuestionTime,
-								FormatDescription( FormatModel.ItemDescription, item.Value.Question ),
-								FormatDescription( FormatModel.ItemDescription, item.Value.Answer )
+								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Question ),
+								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Answer )
 							)
 						);
 					}
 				}
+				// リストが空の時
 				else {
 					content.AppendLine( string.Format( FormatModel.Description, PresetModel.None ) );
 				}
@@ -392,6 +843,7 @@ namespace DailyReportMaker {
 				#region 不正印刷
 
 				content.AppendLine( string.Format( FormatModel.SubTitleWithCount, "不正印刷", InjusticePrintList.Count ) );
+				// リストに項目がある時
 				if( InjusticePrintList.Any() ) {
 					foreach( var item in InjusticePrintList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
@@ -401,11 +853,12 @@ namespace DailyReportMaker {
 								item.Value.FoundTime,
 								item.Value.User,
 								string.IsNullOrEmpty( item.Value.FileName ) ? "N/A" : item.Value.FileName,
-								FormatDescription( FormatModel.ItemDescription, item.Value.Description )
+								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Description )
 							)
 						);
 					} 
 				}
+				// リストが空の時
 				else {
 					content.AppendLine( string.Format( FormatModel.Description, PresetModel.None ) );
 				}
@@ -416,6 +869,7 @@ namespace DailyReportMaker {
 				#region 2重ログイン
 
 				content.AppendLine( string.Format( FormatModel.SubTitleWithCount, "2重ログイン", DuplicateLoginList.Count ) );
+				// リストに項目がある時
 				if( DuplicateLoginList.Any() ) {
 					foreach( var item in DuplicateLoginList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
@@ -424,11 +878,12 @@ namespace DailyReportMaker {
 								item.Index,
 								item.Value.FoundTime,
 								item.Value.User,
-								FormatDescription( FormatModel.ItemDescription, item.Value.Description )
+								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Description )
 							)
 						);
 					} 
 				}
+				// リストが空の時
 				else {
 					content.AppendLine( string.Format( FormatModel.Description, PresetModel.None ) );
 				}
@@ -439,6 +894,7 @@ namespace DailyReportMaker {
 				#region その他の注意
 
 				content.AppendLine( string.Format( FormatModel.SubTitleWithCount, "その他の注意", OtherMatterList.Count ) );
+				// リストに項目がある時
 				if( OtherMatterList.Any() ) {
 					foreach( var item in OtherMatterList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
@@ -451,6 +907,7 @@ namespace DailyReportMaker {
 						);
 					} 
 				}
+				// リストが空の時
 				else {
 					content.AppendLine( string.Format( FormatModel.Description, PresetModel.None ) );
 				}
@@ -461,6 +918,7 @@ namespace DailyReportMaker {
 				#region 遺失物
 
 				content.AppendLine( string.Format( FormatModel.SubTitleWithCount, "遺失物", LostSumthingList.Count ) );
+				// リストに項目がある時
 				if( LostSumthingList.Any() ) {
 					foreach( var item in LostSumthingList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						if( string.IsNullOrEmpty( item.Value.Remarks ) ) {
@@ -475,6 +933,7 @@ namespace DailyReportMaker {
 						}
 					}
 				}
+				// リストが空の時
 				else {
 					content.AppendLine( string.Format( FormatModel.Description, PresetModel.None ) );
 				}
@@ -485,7 +944,7 @@ namespace DailyReportMaker {
 				#region 備品状況
 
 				content.AppendLine( string.Format( FormatModel.SubTitle, "備品状況" ) );
-				foreach( var item in FixtureInfo.Split( NewLine, StringSplitOptions.RemoveEmptyEntries ) ) {
+				foreach( var item in FixtureInfo.Split( newLine, StringSplitOptions.RemoveEmptyEntries ) ) {
 					content.AppendLine( string.Format( FormatModel.Description, item ) );
 				}
 				content.AppendLine();
@@ -514,9 +973,64 @@ namespace DailyReportMaker {
 		///		入力した項目から日報データを生成します。
 		/// </summary>
 		public async Task GenerateDailyReportDataAsync() {
-			var result = await GenerateDailyReportData();
+			var result = await GenerateDailyReportData( CancellationToken.None );
 			GenerateDailyReportCompleted?.Invoke( this, new NotifyResultEventArgs<ResultInfo<bool>>( result ) );
 		}
+
+		/// <summary>
+		///		作成した日報データをテキストファイルに保存します。
+		/// </summary>
+		/// <param name="url">テキストファイルのパス</param>
+		/// <param name="cancellationToken">処理のキャンセルを要求するトークン</param>
+		/// <returns>保存結果を表す、ResultInfoオブジェクト</returns>
+		public Task<ResultInfo<bool>> SaveDailyReportData( string url, CancellationToken cancellationToken ) {
+
+			string fileName = Path.GetFileName( url );
+
+			var result = new ResultInfo<bool> {
+				Result = true,
+				Message = $"作成済みの日報データをテキストファイル({fileName})を保存しました。",
+			};
+
+			try {
+
+				using( StreamWriter sw = new StreamWriter( url ) ) {
+					sw.WriteLine( $"作成日 : {DateTime.Now.ToString( "yyyy/MM/dd HH:mm:ss" )}" );
+					sw.WriteLine( "--- タイトル ---" );
+					sw.WriteLine( DailyReportPreviewTitle );
+					sw.WriteLine( "------" );
+					sw.WriteLine( "--- 本文 ---" );
+					sw.WriteLine( DailyReportPreviewContent );
+					sw.WriteLine( "------" );
+				}
+
+			}
+			catch( Exception e ) {
+				result.Result = false;
+				result.Message = $"作成済みの日報データをテキストファイル({fileName})に保存できませんでした。";
+				result.AdditionalInfo = e.Message;
+			}
+			finally {
+				if( result.AdditionalInfo != null ) {
+					Reporter.Report( $"{result.Message} (追加情報 : {result.AdditionalInfo})" );
+				}
+				else {
+					Reporter.Report( result.Message );
+				}
+			}
+
+			return Task.FromResult( result );
+		}
+
+		/// <summary>
+		///		作成した日報データをテキストファイルに保存します。
+		/// </summary>
+		/// <param name="url">テキストファイルのパス</param>
+		public async Task SaveDailyReportDataAsync( string url ) {
+			var result = await SaveDailyReportData( url, CancellationToken.None );
+		}
+
+		#endregion
 
 		#endregion
 

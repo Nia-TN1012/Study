@@ -132,7 +132,7 @@ namespace DailyReportMaker {
 		/// <summary>
 		///		業務概要のリストを取得します。
 		/// </summary>
-		public ObservableCollection<WorkTimeItem> WorkingOverviewList =>
+		public ObservableCollection<WorkOverviewItem> WorkingOverviewList =>
 			dailyReportModel.WorkSummary.WorkingOverviewList;
 
 		/// <summary>
@@ -349,7 +349,7 @@ namespace DailyReportMaker {
 		public MainViewModel() {
 
 			dailyReportModel = new DailyReportModel();
-			WorkingOverviewList.Add( new WorkTimeItem() );
+			WorkingOverviewList.Add( new WorkOverviewItem() );
 
 			dailyReportModel.PropertyChanged +=
 				( sender, e ) =>
@@ -446,9 +446,8 @@ namespace DailyReportMaker {
 					_ => {
 						LoadDRMInputFileAction?.Invoke( this,
 							new CallbackEventArgs<string>(
-								async fileName => {
-									dailyReportModel.ClearAll();
-									await XMLIOModel.Load( fileName, dailyReportModel, CancellationToken.None );
+								fileName => {
+									dailyReportModel.LoadDataFileAsync( fileName );
 									NotifyInputFormPropertyChanged();
 								}
 							)
@@ -474,9 +473,7 @@ namespace DailyReportMaker {
 					_ => {
 						SaveDRMInputFileAction?.Invoke( this,
 							new CallbackEventArgs<string>(
-								async fileName => {
-									await XMLIOModel.Save( fileName, dailyReportModel, CancellationToken.None );
-								}
+								fileName => dailyReportModel.SaveDataFileAsync( fileName )
 							)
 						);
 					},
@@ -516,9 +513,8 @@ namespace DailyReportMaker {
 			( loadDRTempCommand =
 				new ActionCommand(
 					this,
-					async _ => {
-						dailyReportModel.ClearAll();
-						await XMLIOModel.Load( $@"{appDirectory}\temp.drmitatmp", dailyReportModel, CancellationToken.None );
+					_ => {
+						dailyReportModel.LoadDataFileAsync( $@"{appDirectory}\temp.drmitatmp" );
 						NotifyInputFormPropertyChanged();
 					},
 					_ => true
@@ -537,9 +533,7 @@ namespace DailyReportMaker {
 			( saveDRTempCommand =
 				new ActionCommand(
 					this,
-					async _ => {
-						await XMLIOModel.Save( $@"{appDirectory}\temp.drmitatmp", dailyReportModel, CancellationToken.None );
-					},
+					_ => dailyReportModel.SaveDataFileAsync( $@"{appDirectory}\temp.drmitatmp" ),
 					_ => true
 				)
 			);
@@ -561,7 +555,7 @@ namespace DailyReportMaker {
 				new ActionCommand(
 					this,
 					_ => {
-						WorkingOverviewList.Add( new WorkTimeItem() );
+						WorkingOverviewList.Add( new WorkOverviewItem() );
 						WorkingOverviewListIndex = WorkingOverviewList.Count - 1;
 					},
 					_ => true
@@ -1564,9 +1558,7 @@ namespace DailyReportMaker {
 			( generateDailyReportDataCommand =
 				new ActionCommand(
 					this,
-					_ => {
-						dailyReportModel.GenerateDailyReportDataAsync();
-					},
+					_ => dailyReportModel.GenerateDailyReportDataAsync(),
 					_ => true
 				)
 			);
@@ -1604,9 +1596,7 @@ namespace DailyReportMaker {
 						SaveDRAction?.Invoke( this,
 							new InteractiveMassagingEventArgs<string, string>(
 								$"日報_{dailyReportModel.TAInfo.RoomName}_{dailyReportModel.TAInfo.Date.ToString( "MMdd" )}_{dailyReportModel.TAInfo.TAName}",
-								async fileName => {
-									await DRIOModel.Save( fileName, dailyReportModel, CancellationToken.None );
-								}
+								fileName => dailyReportModel.SaveDailyReportDataAsync( fileName )
 							)
 						);
 					},

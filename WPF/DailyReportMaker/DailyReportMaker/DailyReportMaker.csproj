@@ -109,7 +109,6 @@
     <Compile Include="Models\FormatModel.cs" />
     <Compile Include="Common\MainWindowConverter.cs" />
     <Compile Include="Models\PresetModel.cs" />
-    <Compile Include="Models\XMLIOModel.cs" />
     <Compile Include="ViemModels\MainViewModel.cs" />
     <Compile Include="ViemModels\ViewModelBase.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">

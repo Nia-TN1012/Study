@@ -39,6 +39,7 @@
 			<Setter Property="FontSize" Value="14"/>
 		</Style>
 
+		<!-- 項目の上下移動・削除ボタン用 -->
 		<Style x:Key="CustomButton2Key" TargetType="{x:Type Button}" 
 			   BasedOn="{StaticResource CustomButton2Key}">
 			<Setter Property="Background" Value="Transparent"/>
@@ -177,7 +178,7 @@
 			<!-- タイトルバー -->
 			<Grid Grid.Row="0"
 				  Background="{Binding IsActive, Converter={StaticResource CaptionBarBackgroundConverterKey},
-						 ConverterParameter={StaticResource MainWindowBorderBrushKey}, ElementName=MainWindow1}">
+										ConverterParameter={StaticResource MainWindowBorderBrushKey}, ElementName=MainWindow1}">
 
 				<!-- 左からアイコン、タイトル、コマンドボタン -->
 				<Grid.ColumnDefinitions>
@@ -233,6 +234,8 @@
 			<TabControl Grid.Row="1" Margin="4"
 						SelectedIndex="0">
 
+				<!-- 入力フォーム ここから -->
+
 				<!-- TA情報の入力フォーム -->
 				<TabItem Header="TA情報(_I)">
 					<Grid>
@@ -261,7 +264,7 @@
 							<Label Grid.Row="0" Grid.Column="0"
 								   Margin="5" Padding="5,0" MinWidth="100"
 								   Content="日付"/>
-							
+
 							<DockPanel Grid.Row="0" Grid.Column="1">
 								<!-- 日付の入力 -->
 								<DatePicker Margin="5" Padding="5,0"
@@ -640,7 +643,7 @@
 												<wtk:TimePicker DockPanel.Dock="Left" Margin="5" Padding="5, 0"
 																MinWidth="100"
 																Text="{Binding Value, RelativeSource={RelativeSource Self}}" Value="{Binding OccuredTime}"/>
-												
+
 												<ComboBox DockPanel.Dock="Left" Margin="5"
 														  MinWidth="160"
 														  IsEditable="True" Text="{Binding TypeName}"
@@ -675,7 +678,7 @@
 													ToolTip="この項目を1つ下に移動します。"
 													Command="{Binding DataContext.MoveDownFailureInfoItemCommand, ElementName=MainWindow1}"/>
 										</StackPanel>
-										
+
 									</Grid>
 								</DataTemplate>
 							</ListBox.ItemTemplate>
@@ -749,7 +752,7 @@
 
 												<TextBox DockPanel.Dock="Right" Margin="5"
 														 Text="{Binding User}"/>
-												
+
 											</DockPanel>
 
 											<Label Grid.Row="1" Grid.Column="0" Margin="5" MinWidth="100"
@@ -1093,6 +1096,8 @@
 					</Grid>
 				</TabItem>
 
+				<!-- 入力フォーム ここまで -->
+
 				<!-- 日報データのプレビュー -->
 				<TabItem Header="プレビュー(_V)">
 					<Grid>
@@ -1100,7 +1105,7 @@
 							<ColumnDefinition Width="*"/>
 							<ColumnDefinition Width="Auto"/>
 						</Grid.ColumnDefinitions>
-						
+
 						<Grid Grid.Row="0">
 							<Grid.RowDefinitions>
 								<RowDefinition Height="Auto"/>
@@ -1158,6 +1163,7 @@
 				<TabItem Header="このアプリについて(_U)">
 
 				</TabItem>
+
 			</TabControl>
 
 			<!-- ステータスバー -->
@@ -1170,5 +1176,4 @@
 
 		</Grid>
 	</Border>
-
 </Window>

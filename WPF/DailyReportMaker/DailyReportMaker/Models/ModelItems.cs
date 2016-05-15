@@ -43,7 +43,7 @@ namespace DailyReportMaker {
 	/// <summary>
 	///		業務時間の項目を表します。
 	/// </summary>
-	public class WorkTimeItem {
+	public class WorkOverviewItem {
 		/// <summary>
 		///		開始時間を取得・設定します。
 		/// </summary>
@@ -72,7 +72,7 @@ namespace DailyReportMaker {
 		/// <summary>
 		///		業務時間の項目リストを取得・設定します。
 		/// </summary>
-		public ObservableCollection<WorkTimeItem> WorkingOverviewList { get; private set; } = new ObservableCollection<WorkTimeItem>();
+		public ObservableCollection<WorkOverviewItem> WorkingOverviewList { get; private set; } = new ObservableCollection<WorkOverviewItem>();
 
 		/// <summary>
 		///		利用者の状況を取得・設定します。
