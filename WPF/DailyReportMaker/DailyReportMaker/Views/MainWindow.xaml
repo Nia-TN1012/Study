@@ -261,21 +261,22 @@
 							<Label Grid.Row="0" Grid.Column="0"
 								   Margin="5" Padding="5,0" MinWidth="100"
 								   Content="日付"/>
+							
 							<DockPanel Grid.Row="0" Grid.Column="1">
 								<!-- 日付の入力 -->
-								<DatePicker Margin="5" Padding="5,0" DockPanel.Dock="Left"
+								<DatePicker Margin="5" Padding="5,0"
 											HorizontalAlignment="Left" MinWidth="200"
 											Text="{Binding Date, Mode=TwoWay}"/>
-								<Button Margin="5" Padding="5,0" MinWidth="80"
+								<Button DockPanel.Dock="Left" Margin="5" Padding="5,0" MinWidth="80"
 										Content="今日"
 										Command="{Binding SetTodayCommand}"/>
 
 								<!-- 教室番号 -->
-								<Label Margin="5" Padding="5,0" DockPanel.Dock="Left"
+								<Label DockPanel.Dock="Left" Margin="5" Padding="5,0"
 									   MinWidth="100"
 									   Content="教室番号"/>
 								<!-- 既知の教室番号をコンボボックスから選択できるようにしています。 -->
-								<ComboBox Margin="5" Padding="5,0" DockPanel.Dock="Right"
+								<ComboBox DockPanel.Dock="Right" Margin="5" Padding="5,0"
 										  ItemsSource="{Binding RoomNameList}"
 										  IsEditable="True" Text="{Binding RoomName}">
 									<ComboBox.ItemTemplate>
@@ -636,17 +637,17 @@
 
 											<DockPanel Grid.Row="0" Grid.Column="1">
 
-												<wtk:TimePicker Margin="5" Padding="5, 0" DockPanel.Dock="Left"
-																HorizontalAlignment="Left"
+												<wtk:TimePicker DockPanel.Dock="Left" Margin="5" Padding="5, 0"
 																MinWidth="100"
 																Text="{Binding Value, RelativeSource={RelativeSource Self}}" Value="{Binding OccuredTime}"/>
-												<ComboBox Grid.Row="0" Grid.Column="0" Margin="5" DockPanel.Dock="Left"
-														  HorizontalAlignment="Center" MinWidth="160"
+												
+												<ComboBox DockPanel.Dock="Left" Margin="5"
+														  MinWidth="160"
 														  IsEditable="True" Text="{Binding TypeName}"
 														  ItemsSource="{Binding DataContext.FixtureTypeList, ElementName=MainWindow1}">
 												</ComboBox>
 
-												<TextBox Grid.Row="0" Grid.Column="1" Margin="5" DockPanel.Dock="Right"
+												<TextBox DockPanel.Dock="Right" Margin="5"
 														 Text="{Binding Name}"/>
 
 											</DockPanel>
@@ -734,29 +735,22 @@
 												<ColumnDefinition Width="*"/>
 											</Grid.ColumnDefinitions>
 
-											<Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+											<Label Grid.Row="0" Grid.Column="0" Margin="5" Padding="5, 0" MinWidth="100"
+												   Content="発見時刻"/>
 
-												<Grid.ColumnDefinitions>
-													<ColumnDefinition Width="Auto"/>
-													<ColumnDefinition Width="Auto"/>
-													<ColumnDefinition Width="Auto"/>
-													<ColumnDefinition Width="*"/>
-												</Grid.ColumnDefinitions>
+											<DockPanel Grid.Row="0" Grid.Column="1">
 
-												<Label Grid.Column="0" Margin="5" Padding="5, 0" MinWidth="100"
-													   Content="発見時刻"/>
-
-												<wtk:TimePicker Grid.Column="1" Margin="5" Padding="5, 0"
-																HorizontalAlignment="Left"
+												<wtk:TimePicker DockPanel.Dock="Left" Margin="5" Padding="5, 0"
 																MinWidth="100"
 																Text="{Binding Value, RelativeSource={RelativeSource Self}}" Value="{Binding FoundTime}"/>
 
-												<Label Grid.Column="2" Margin="5" Padding="5, 0" MinWidth="100"
+												<Label DockPanel.Dock="Left" Margin="5" Padding="5, 0" MinWidth="100"
 													   Content="ユーザー名"/>
 
-												<TextBox Grid.Column="3" Margin="5"
+												<TextBox DockPanel.Dock="Right" Margin="5"
 														 Text="{Binding User}"/>
-											</Grid>
+												
+											</DockPanel>
 
 											<Label Grid.Row="1" Grid.Column="0" Margin="5" MinWidth="100"
 												   Content="ファイル名"/>
@@ -848,7 +842,6 @@
 											<DockPanel Grid.Row="0" Grid.Column="1">
 
 												<wtk:TimePicker DockPanel.Dock="Left" Margin="5" Padding="5, 0"
-																HorizontalAlignment="Left"
 																MinWidth="100"
 																Text="{Binding Value, RelativeSource={RelativeSource Self}}" Value="{Binding FoundTime}"/>
 
@@ -1020,7 +1013,6 @@
 
 											<DockPanel Grid.Row="0" Grid.Column="1">
 												<wtk:TimePicker DockPanel.Dock="Left" Margin="5" Padding="5, 0"
-																HorizontalAlignment="Left"
 																MinWidth="100"
 																Text="{Binding Value, RelativeSource={RelativeSource Self}}" Value="{Binding FoundTime}"/>
 
