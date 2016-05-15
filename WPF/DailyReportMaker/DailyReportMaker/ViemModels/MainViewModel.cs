@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,7 +12,6 @@ using System.Reflection;
 using System.IO;
 
 using Nia_Tech.ModelExtentions;
-
 
 namespace DailyReportMaker {
 
@@ -31,6 +31,11 @@ namespace DailyReportMaker {
 		///		アプリのディレクトリを表します。
 		/// </summary>
 		private string appDirectory = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location );
+
+		/// <summary>
+		///		アプリの情報を取得します。
+		/// </summary>
+		public FileVersionInfo AppInfo { get; private set; }
 
 		#endregion
 
@@ -361,6 +366,8 @@ namespace DailyReportMaker {
 					NotifyPropertyChanged( nameof( DailyReportPreviewContent ) );
 				};
 
+			AppInfo = FileVersionInfo.GetVersionInfo( Assembly.GetExecutingAssembly().Location );
+
 			dailyReportModel.Reporter.Report( "準備完了" );
 		}
 
@@ -615,19 +622,11 @@ namespace DailyReportMaker {
 					this,
 					_ => {
 						if( WorkingOverviewListIndex >= 0 && WorkingOverviewListIndex < WorkingOverviewList.Count ) {
-							ComfirmAction?.Invoke(
-								this,
-								new ComfirmEventArgs(
-									"選択した項目を削除してよろしいですか？",
-									() => {
-										int index = WorkingOverviewListIndex;
-										if( WorkingOverviewListIndex >= 0 && WorkingOverviewListIndex < WorkingOverviewList.Count ) {
-											WorkingOverviewList.RemoveAt( WorkingOverviewListIndex );
-											WorkingOverviewListIndex = index < WorkingOverviewList.Count ? index : index - 1;
-										}
-									}
-								)
-							);
+							int index = WorkingOverviewListIndex;
+							if( WorkingOverviewListIndex >= 0 && WorkingOverviewListIndex < WorkingOverviewList.Count ) {
+								WorkingOverviewList.RemoveAt( WorkingOverviewListIndex );
+								WorkingOverviewListIndex = index < WorkingOverviewList.Count ? index : index - 1;
+							}
 						}
 					},
 					_ => true
@@ -761,19 +760,11 @@ namespace DailyReportMaker {
 					this,
 					_ => {
 						if( QuestionListIndex >= 0 && QuestionListIndex < QuestionList.Count ) {
-							ComfirmAction?.Invoke(
-								this,
-								new ComfirmEventArgs(
-									"選択した質問の項目を削除してよろしいですか？",
-									() => {
-										int index = QuestionListIndex;
-										if( QuestionListIndex >= 0 && QuestionListIndex < QuestionList.Count ) {
-											QuestionList.RemoveAt( QuestionListIndex );
-											QuestionListIndex = index < QuestionList.Count ? index : index - 1;
-										}
-									}
-								)
-							);
+							int index = QuestionListIndex;
+							if( QuestionListIndex >= 0 && QuestionListIndex < QuestionList.Count ) {
+								QuestionList.RemoveAt( QuestionListIndex );
+								QuestionListIndex = index < QuestionList.Count ? index : index - 1;
+							}
 						}
 					},
 					_ => true
@@ -907,19 +898,11 @@ namespace DailyReportMaker {
 					this,
 					_ => {
 						if( FailureInfoListIndex >= 0 && FailureInfoListIndex < FailureInfoList.Count ) {
-							ComfirmAction?.Invoke(
-								this,
-								new ComfirmEventArgs(
-									"選択した機器・アプリのトラブル情報の項目を削除してよろしいですか？",
-									() => {
-										int index = FailureInfoListIndex;
-										if( FailureInfoListIndex >= 0 && FailureInfoListIndex < FailureInfoList.Count ) {
-											FailureInfoList.RemoveAt( FailureInfoListIndex );
-											FailureInfoListIndex = index < FailureInfoList.Count ? index : index - 1;
-										}
-									}
-								)
-							);
+							int index = FailureInfoListIndex;
+							if( FailureInfoListIndex >= 0 && FailureInfoListIndex < FailureInfoList.Count ) {
+								FailureInfoList.RemoveAt( FailureInfoListIndex );
+								FailureInfoListIndex = index < FailureInfoList.Count ? index : index - 1;
+							}
 						}
 					},
 					_ => true
@@ -1053,19 +1036,11 @@ namespace DailyReportMaker {
 					this,
 					_ => {
 						if( InjusticePrintListIndex >= 0 && InjusticePrintListIndex < InjusticePrintList.Count ) {
-							ComfirmAction?.Invoke(
-								this,
-								new ComfirmEventArgs(
-									"選択した不正印刷情報の項目を削除してよろしいですか？",
-									() => {
-										int index = InjusticePrintListIndex;
-										if( InjusticePrintListIndex >= 0 && InjusticePrintListIndex < InjusticePrintList.Count ) {
-											InjusticePrintList.RemoveAt( InjusticePrintListIndex );
-											InjusticePrintListIndex = index < InjusticePrintList.Count ? index : index - 1;
-										}
-									}
-								)
-							);
+							int index = InjusticePrintListIndex;
+							if( InjusticePrintListIndex >= 0 && InjusticePrintListIndex < InjusticePrintList.Count ) {
+								InjusticePrintList.RemoveAt( InjusticePrintListIndex );
+								InjusticePrintListIndex = index < InjusticePrintList.Count ? index : index - 1;
+							}
 						}
 					},
 					_ => true
@@ -1199,19 +1174,11 @@ namespace DailyReportMaker {
 					this,
 					_ => {
 						if( DuplicateLoginListIndex >= 0 && DuplicateLoginListIndex < DuplicateLoginList.Count ) {
-							ComfirmAction?.Invoke(
-								this,
-								new ComfirmEventArgs(
-									"選択した2重ログイン情報の項目を削除してよろしいですか？",
-									() => {
-										int index = DuplicateLoginListIndex;
-										if( DuplicateLoginListIndex >= 0 && DuplicateLoginListIndex < DuplicateLoginList.Count ) {
-											DuplicateLoginList.RemoveAt( DuplicateLoginListIndex );
-											DuplicateLoginListIndex = index < DuplicateLoginList.Count ? index : index - 1;
-										}
-									}
-								)
-							);
+							int index = DuplicateLoginListIndex;
+							if( DuplicateLoginListIndex >= 0 && DuplicateLoginListIndex < DuplicateLoginList.Count ) {
+								DuplicateLoginList.RemoveAt( DuplicateLoginListIndex );
+								DuplicateLoginListIndex = index < DuplicateLoginList.Count ? index : index - 1;
+							}
 						}
 					},
 					_ => true
@@ -1327,19 +1294,11 @@ namespace DailyReportMaker {
 					this,
 					_ => {
 						if( OtherMatterListIndex >= 0 && OtherMatterListIndex < OtherMatterList.Count ) {
-							ComfirmAction?.Invoke(
-								this,
-								new ComfirmEventArgs(
-									"選択したその他の注意情報の項目を削除してよろしいですか？",
-									() => {
-										int index = OtherMatterListIndex;
-										if( OtherMatterListIndex >= 0 && OtherMatterListIndex < OtherMatterList.Count ) {
-											OtherMatterList.RemoveAt( OtherMatterListIndex );
-											OtherMatterListIndex = index < OtherMatterList.Count ? index : index - 1;
-										}
-									}
-								)
-							);
+							int index = OtherMatterListIndex;
+							if( OtherMatterListIndex >= 0 && OtherMatterListIndex < OtherMatterList.Count ) {
+								OtherMatterList.RemoveAt( OtherMatterListIndex );
+								OtherMatterListIndex = index < OtherMatterList.Count ? index : index - 1;
+							}
 						}
 					},
 					_ => true
@@ -1473,19 +1432,11 @@ namespace DailyReportMaker {
 					this,
 					_ => {
 						if( LostSumthingListIndex >= 0 && LostSumthingListIndex < LostSumthingList.Count ) {
-							ComfirmAction?.Invoke(
-								this,
-								new ComfirmEventArgs(
-									"選択した遺失物の情報の項目を削除してよろしいですか？",
-									() => {
-										int index = LostSumthingListIndex;
-										if( LostSumthingListIndex >= 0 && LostSumthingListIndex < LostSumthingList.Count ) {
-											LostSumthingList.RemoveAt( LostSumthingListIndex );
-											LostSumthingListIndex = index < LostSumthingList.Count ? index : index - 1;
-										}
-									}
-								)
-							);
+							int index = LostSumthingListIndex;
+							if( LostSumthingListIndex >= 0 && LostSumthingListIndex < LostSumthingList.Count ) {
+								LostSumthingList.RemoveAt( LostSumthingListIndex );
+								LostSumthingListIndex = index < LostSumthingList.Count ? index : index - 1;
+							}
 						}
 					},
 					_ => true

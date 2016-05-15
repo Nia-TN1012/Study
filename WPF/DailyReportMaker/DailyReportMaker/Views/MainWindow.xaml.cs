@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -99,7 +100,7 @@ namespace DailyReportMaker {
 
 		private void MainViewModel_ComfirmAction( object sender, ComfirmEventArgs e ) {
 
-			if( MessageBox.Show( e.Message, "", MessageBoxButton.YesNo, MessageBoxImage.Question ) == MessageBoxResult.Yes ) {
+			if( MessageBox.Show( e.Message, "確認", MessageBoxButton.YesNo, MessageBoxImage.Question ) == MessageBoxResult.Yes ) {
 				e.Callback?.Invoke();
 			}
 
@@ -124,6 +125,13 @@ namespace DailyReportMaker {
 			if( sfdDailyReport.ShowDialog() ?? false ) {
 				e.Callback?.Invoke( sfdDailyReport.FileName );
 			}
+		}
+
+		/// <summary>
+		///		ハイパーリンクをクリックした時に発生するイベント処理です。
+		/// </summary>
+		private void Hyperlink_RequestNavigate( object sender, RequestNavigateEventArgs e ) {
+			Process.Start( e.Uri.AbsoluteUri );
 		}
 	}
 }

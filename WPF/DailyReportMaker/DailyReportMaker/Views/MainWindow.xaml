@@ -6,9 +6,10 @@
         xmlns:local="clr-namespace:DailyReportMaker"
 		xmlns:wtk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Daily Report Maker for Imformation TA" x:Name="MainWindow1"
+        Title="{Binding AppInfo.ProductName}" x:Name="MainWindow1"
 		ResizeMode="CanResizeWithGrip" WindowState="Maximized"
-		Height="640" Width="960">
+		Height="640" Width="960"
+		Icon="/DailyReportMaker;component/DRMITA.ico">
 
 	<Window.Resources>
 		<!-- Converterクラスの登録 -->
@@ -121,6 +122,7 @@
 			<Setter Property="EndTime" Value="20:00:00"/>
 			<Setter Property="TextAlignment" Value="Center"/>
 			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="UpdateValueOnEnterKey" Value="True"/>
 		</Style>
 
 		<!-- アップダウン用 -->
@@ -705,7 +707,7 @@
 				</TabItem>
 
 				<!-- 不正印刷 -->
-				<TabItem Header="不正印刷(_R)">
+				<TabItem Header="不正印刷(_P)">
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
@@ -1099,7 +1101,7 @@
 				<!-- 入力フォーム ここまで -->
 
 				<!-- 日報データのプレビュー -->
-				<TabItem Header="プレビュー(_V)">
+				<TabItem Header="プレビュー(_R)">
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
@@ -1160,8 +1162,69 @@
 				</TabItem>
 
 				<!-- About画面 -->
-				<TabItem Header="このアプリについて(_U)">
+				<TabItem Header="バージョン情報(_V)">
+					<Grid Margin="5">
+						<DockPanel Margin="10">
+							<Grid Margin="10, 5"
+								  DockPanel.Dock="Top">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="120"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<Image Grid.Column="0"
+										Margin="10"
+										VerticalAlignment="Center"
+										Source="/DailyReportMaker;component/DRMITA.ico"/>
+								<StackPanel Grid.Column="1"
+											VerticalAlignment="Center">
+									<TextBlock Margin="10, 0"
+											   FontSize="32"
+											   Text="{Binding AppInfo.ProductName}"/>
+									<TextBlock Margin="10, 0"
+											   Text="{Binding AppInfo.ProductVersion, StringFormat=Ver. {0}}"/>
+								</StackPanel>
+							</Grid>
 
+							<TextBlock Margin="10,10,10,0" DockPanel.Dock="Top"
+										   Text="本アプリで使用しているライブラリについて"/>
+							<Border Margin="10"
+									DockPanel.Dock="Bottom"
+									BorderThickness="1"
+									BorderBrush="{StaticResource CustomNormalLightBrushKey}">
+								<ScrollViewer FocusVisualStyle="{x:Null}"
+											  HorizontalScrollBarVisibility="Disabled">
+									<!--  -->
+									<TextBlock Margin="5"
+											   TextWrapping="WrapWithOverflow"
+											   FocusVisualStyle="{x:Null}">
+											◆ 本アプリに含まれるTimePickerコントロール、NumericUpDownコントロールは、"Xceed.Wpf.Toolkit" を使用しています。<LineBreak/>
+										　	  Copyright ©1994-2016 Xceed Software Inc.<LineBreak/>
+										　	  Released under the Microsoft Public license (Ms-PL)<LineBreak/>
+											　 
+											<Hyperlink NavigateUri="https://wpftoolkit.codeplex.com/"
+													   TargetName="_new"
+													   FocusVisualStyle="{x:Null}"
+													   RequestNavigate="Hyperlink_RequestNavigate"
+													   ToolTip="{Binding NavigateUri.AbsoluteUri, Mode=OneWay, RelativeSource={RelativeSource Self}}">
+												https://wpftoolkit.codeplex.com/
+											</Hyperlink><LineBreak/><LineBreak/>
+										
+											◆ 本アプリにおける処理の結果通知に、"Nia-Tech プロリアクトス・レヴ" を使用しています。<LineBreak/>
+										　	  Copyright (C) 2016 Nia Tomonaka<LineBreak/>
+										　	  Released under the MIT license<LineBreak/>
+											　 
+											<Hyperlink NavigateUri="https://github.com/Nia-TN1012/ProReactsRev/"
+													   TargetName="_new"
+													   FocusVisualStyle="{x:Null}"
+													   RequestNavigate="Hyperlink_RequestNavigate"
+													   ToolTip="{Binding NavigateUri.AbsoluteUri, Mode=OneWay, RelativeSource={RelativeSource Self}}">
+												https://github.com/Nia-TN1012/ProReactsRev/
+											</Hyperlink>
+									</TextBlock>
+								</ScrollViewer>
+							</Border>
+						</DockPanel>
+					</Grid>
 				</TabItem>
 
 			</TabControl>

@@ -7,12 +7,12 @@ using System.Windows;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle( "DailyReportMaker for Information TA" )]
+[assembly: AssemblyTitle( "Daily Report Maker for Imformation TA" )]
 [assembly: AssemblyDescription( "情報TA用日報メーカー" )]
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "Nia Tomonaka" )]
-[assembly: AssemblyProduct( "DailyReportMaker for Information TA" )]
-[assembly: AssemblyCopyright( "Copyright © 2016  Nia Tomonaka" )]
+[assembly: AssemblyProduct( "Daily Report Maker for Imformation TA" )]
+[assembly: AssemblyCopyright( "Copyright (C) 2016  Nia Tomonaka" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 
