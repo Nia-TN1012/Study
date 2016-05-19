@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<formats>
+	<!-- 日報のタイトル -->
+	<head>
+		<title>
+			<![CDATA[日報：{0} {1:MM/dd} {2}]]>
+		</title>
+	</head>
+	<!-- 日報の本文 -->
+	<body>
+		<itemname>
+			<![CDATA[◆ {0}]]>
+		</itemname>
+		<itemnamewithcount>
+			<![CDATA[◆ {0}　{1}件]]>
+		</itemnamewithcount>
+		<description>
+			<![CDATA[　{0}]]>
+		</description>
+		<descriptionforattendance>
+			<![CDATA[　　{0}]]>
+		</descriptionforattendance>
+		<descriptionforitem>
+			<![CDATA[　　　{0}]]>
+		</descriptionforitem>
+		<attendanceinfo>
+			<![CDATA[　勤務時間 : {0:H:mm} ～ {1:H:mm}
+　詳細情報・備考 : {2}]]>
+		</attendanceinfo>
+		<attendanceinfonodesc>
+			<![CDATA[　勤務時間 : {0:H:mm} ～ {1:H:mm}]]>
+		</attendanceinfonodesc>
+		<workoverview>
+			<![CDATA[　{0:H:mm} ～ {1:H:mm} : {2} （ 備考 : {3} ）]]>
+		</workoverview>
+		<workoverviewnoremarks>
+			<![CDATA[　{0:H:mm} ～ {1:H:mm} : {2}]]>
+		</workoverviewnoremarks>
+		<failureinfo>
+			<![CDATA[　[{0}]
+　　{1} : {2}
+　　発生時刻 : {3:H:mm}
+　　詳細情報 : {4}]]>
+		</failureinfo>
+		<question>
+			<![CDATA[　[{0}]
+　　質問時刻 : {1:H:mm}
+　　Q. {2}
+　　A. {3}]]>
+		</question>
+		<injusticeprint>
+			<![CDATA[　[{0}]
+　　発見した時刻 : {1:H:mm}
+　　ユーザー : {2}
+　　ファイル名 : {3}
+　　詳細情報 : {4}]]>
+		</injusticeprint>
+		<duplicatelogin>
+			<![CDATA[　[{0}]
+　　発見した時刻 : {1:H:mm}
+　　ユーザー : {2}
+　　詳細情報 : {3}]]>
+		</duplicatelogin>
+		<lostsumthing>
+			<![CDATA[　[{0}]
+　　発見した時刻 : {1:H:mm}
+　　発見した場所 : {2}
+　　名前 : {3}
+　　備考 : {4}]]>
+		</lostsumthing>
+		<lostsumthingnoremarks>
+			<![CDATA[　[{0}]
+　　発見した時刻 : {1:H:mm}
+　　発見した場所 : {2}
+　　名前 : {3}]]>
+		</lostsumthingnoremarks>
+		<othermatter>
+			<![CDATA[　{0}. {1} （ {2}名 ）]]>
+		</othermatter>
+	</body>
+</formats>

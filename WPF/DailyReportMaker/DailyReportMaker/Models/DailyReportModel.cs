@@ -760,7 +760,7 @@ namespace DailyReportMaker {
 						string.Format(
 							FormatModel.AttendanceInfo,
 							TAInfo.StartTime, TAInfo.EndTime,
-							StringFormatForEachLine( FormatModel.Description2, TAInfo.Description )
+							StringFormatForEachLine( FormatModel.DescriptionForAttendance, TAInfo.Description )
 						)
 					);
 				}
@@ -774,10 +774,10 @@ namespace DailyReportMaker {
 				
 				foreach( var item in WorkSummary.WorkingOverviewList ) {
 					if( string.IsNullOrEmpty( item.Remarks ) ) {
-						content.AppendLine( string.Format( FormatModel.WorkSummaryWithoutRemarks, item.StartTime, item.EndTime, item.Description ) );
+						content.AppendLine( string.Format( FormatModel.WorkOverviewWithoutRemarks, item.StartTime, item.EndTime, item.Description ) );
 					}
 					else {
-						content.AppendLine( string.Format( FormatModel.WorkSummary, item.StartTime, item.EndTime, item.Description, item.Remarks ) );
+						content.AppendLine( string.Format( FormatModel.WorkOverview, item.StartTime, item.EndTime, item.Description, item.Remarks ) );
 					}
 				}
 				content.AppendLine();
@@ -802,7 +802,7 @@ namespace DailyReportMaker {
 								item.Index,
 								item.Value.TypeName, item.Value.Name,
 								item.Value.OccuredTime,
-								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Description )
+								StringFormatForEachLine( FormatModel.DescriptionForItem, item.Value.Description )
 							)
 						);
 					}
@@ -823,11 +823,11 @@ namespace DailyReportMaker {
 					foreach( var item in QuestionList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
 							string.Format(
-								FormatModel.Questions,
+								FormatModel.Question,
 								item.Index,
 								item.Value.QuestionTime,
-								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Question ),
-								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Answer )
+								StringFormatForEachLine( FormatModel.DescriptionForItem, item.Value.Question ),
+								StringFormatForEachLine( FormatModel.DescriptionForItem, item.Value.Answer )
 							)
 						);
 					}
@@ -848,12 +848,12 @@ namespace DailyReportMaker {
 					foreach( var item in InjusticePrintList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
 							string.Format(
-								FormatModel.InjusticePrints,
+								FormatModel.InjusticePrint,
 								item.Index,
 								item.Value.FoundTime,
 								item.Value.User,
 								string.IsNullOrEmpty( item.Value.FileName ) ? "N/A" : item.Value.FileName,
-								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Description )
+								StringFormatForEachLine( FormatModel.DescriptionForItem, item.Value.Description )
 							)
 						);
 					} 
@@ -874,11 +874,11 @@ namespace DailyReportMaker {
 					foreach( var item in DuplicateLoginList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
 							string.Format(
-								FormatModel.DuplicateLogins,
+								FormatModel.DuplicateLogin,
 								item.Index,
 								item.Value.FoundTime,
 								item.Value.User,
-								StringFormatForEachLine( FormatModel.ItemDescription, item.Value.Description )
+								StringFormatForEachLine( FormatModel.DescriptionForItem, item.Value.Description )
 							)
 						);
 					} 
@@ -899,7 +899,7 @@ namespace DailyReportMaker {
 					foreach( var item in OtherMatterList.Select( ( v, i ) => new { Index = i + 1, Value = v } ) ) {
 						content.AppendLine(
 							string.Format(
-								FormatModel.OtherMatters,
+								FormatModel.OtherMatter,
 								item.Index,
 								item.Value.Description,
 								item.Value.Num
@@ -928,7 +928,7 @@ namespace DailyReportMaker {
 						}
 						else {
 							content.AppendLine(
-								string.Format( FormatModel.LostSumthings, item.Index, item.Value.FoundTime, item.Value.FoundPlace, item.Value.Name, item.Value.Remarks )
+								string.Format( FormatModel.LostSumthing, item.Index, item.Value.FoundTime, item.Value.FoundPlace, item.Value.Name, item.Value.Remarks )
 							);
 						}
 					}
@@ -1011,11 +1011,11 @@ namespace DailyReportMaker {
 				result.AdditionalInfo = e.Message;
 			}
 			finally {
-				if( result.AdditionalInfo != null ) {
-					Reporter.Report( $"{result.Message} (追加情報 : {result.AdditionalInfo})" );
-				}
-				else {
+				if( string.IsNullOrEmpty( result.AdditionalInfo ) ) {
 					Reporter.Report( result.Message );
+				}
+				else {		
+					Reporter.Report( $"{result.Message} (追加情報 : {result.AdditionalInfo})" );
 				}
 			}
 

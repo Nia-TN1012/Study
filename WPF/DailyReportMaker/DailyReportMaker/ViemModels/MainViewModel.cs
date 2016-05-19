@@ -368,7 +368,17 @@ namespace DailyReportMaker {
 
 			AppInfo = FileVersionInfo.GetVersionInfo( Assembly.GetExecutingAssembly().Location );
 
-			dailyReportModel.Reporter.Report( "準備完了" );
+			FormatModel.LoadFormatsCompleted +=
+				( sender, e ) => {
+					if( string.IsNullOrEmpty( e.AdditionalInfo ) ) {
+						dailyReportModel.Reporter.Report( e.Message );
+					}
+					else {
+						dailyReportModel.Reporter.Report( $"{e.Message} (追加情報 : {e.AdditionalInfo})" );
+					}
+				};
+
+			FormatModel.LoadFormatsAsync( $"{appDirectory}/formats.xml", CancellationToken.None );
 		}
 
 		#endregion
