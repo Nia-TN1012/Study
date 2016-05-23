@@ -137,16 +137,15 @@ namespace DailyReportMaker {
 		///		プリセットの教室リストを表します。
 		/// </summary>
 		private static List<RoomItem> roomNameList = new List<RoomItem> {
-			new RoomItem { Name = "教育用情報処理室", Num = "0506" },
-			new RoomItem { Name = "情報処理教室1", Num = "0507" },
-			new RoomItem { Name = "情報処理教室2", Num = "0508" },
-			new RoomItem { Name = "情報処理教室3", Num = "0609" },
-			new RoomItem { Name = "情報処理教室4", Num = "0603" },
-			new RoomItem { Name = "情報処理教室5", Num = "A201" },
-			new RoomItem { Name = "情報処理教室6", Num = "A202" },
-			new RoomItem { Name = "情報処理教室7", Num = "A203" },
-			new RoomItem { Name = "情報処理教室8", Num = "A307" },
-			new RoomItem { Name = "情報処理教室9", Num = "A308" }
+			new RoomItem { Name = "情報処理教室1", Num = "ICR101" },
+			new RoomItem { Name = "情報処理教室2", Num = "ICR102" },
+			new RoomItem { Name = "情報処理教室3", Num = "ICR103" },
+			new RoomItem { Name = "情報処理教室4", Num = "ICR104" },
+			new RoomItem { Name = "情報処理教室5", Num = "ICR201" },
+			new RoomItem { Name = "情報処理教室6", Num = "ICR202" },
+			new RoomItem { Name = "情報処理教室7", Num = "ICR203" },
+			new RoomItem { Name = "情報処理教室8", Num = "ICR301" },
+			new RoomItem { Name = "情報処理教室9", Num = "ICR302" }
 		};
 
 		/// <summary>
@@ -158,14 +157,7 @@ namespace DailyReportMaker {
 		/// <summary>
 		///		プリセットの勤務時間のリストを表します。
 		/// </summary>
-		private static List<TimePeriodWithName> taWorkTimeList = new List<TimePeriodWithName> {
-			new TimePeriodWithName { Name = "情報処理室教室 平日午前", Time = new TimePeriod { Start = DateTime.Parse( "8:40" ), End = DateTime.Parse( "12:40" ) } },
-			new TimePeriodWithName { Name = "情報処理室教室 平日午後", Time = new TimePeriod { Start = DateTime.Parse( "12:30" ), End = DateTime.Parse( "18:30" ) } },
-			new TimePeriodWithName { Name = "教育用情報処理室室 平日午前", Time = new TimePeriod { Start = DateTime.Parse( "8:30" ), End = DateTime.Parse( "12:30" ) } },
-			new TimePeriodWithName { Name = "教育用情報処理室室 平日午後", Time = new TimePeriod { Start = DateTime.Parse( "13:30" ), End = DateTime.Parse( "19:30" ) } },
-			new TimePeriodWithName { Name = "教育用情報処理室室 土曜午前", Time = new TimePeriod { Start = DateTime.Parse( "8:30" ), End = DateTime.Parse( "12:30" ) } },
-			new TimePeriodWithName { Name = "教育用情報処理室室 土曜午後", Time = new TimePeriod { Start = DateTime.Parse( "12:30" ), End = DateTime.Parse( "16:30" ) } }
-		};
+		private static List<TimePeriodWithName> taWorkTimeList = new List<TimePeriodWithName> {};
 
 		/// <summary>
 		///		プリセットの勤務時間のリストを取得します。
@@ -176,13 +168,7 @@ namespace DailyReportMaker {
 		/// <summary>
 		///		プリセットの授業時間のリストを表します。
 		/// </summary>
-		private static List<TimePeriodWithName> lessonTimeList = new List<TimePeriodWithName> {
-			new TimePeriodWithName { Name = "1時限目", Time = new TimePeriod { Start = DateTime.Parse( "8:50" ), End = DateTime.Parse( "10:20" ) } },
-			new TimePeriodWithName { Name = "2時限目", Time = new TimePeriod { Start = DateTime.Parse( "10:30" ), End = DateTime.Parse( "12:00" ) } },
-			new TimePeriodWithName { Name = "3時限目", Time = new TimePeriod { Start = DateTime.Parse( "13:00" ), End = DateTime.Parse( "14:30" ) } },
-			new TimePeriodWithName { Name = "4時限目", Time = new TimePeriod { Start = DateTime.Parse( "14:40" ), End = DateTime.Parse( "16:10" ) } },
-			new TimePeriodWithName { Name = "5時限目", Time = new TimePeriod { Start = DateTime.Parse( "16:20" ), End = DateTime.Parse( "17:50" ) } }
-		};
+		private static List<TimePeriodWithName> lessonTimeList = new List<TimePeriodWithName> {};
 
 		/// <summary>
 		///		プリセットの授業時間のリストを取得します。
